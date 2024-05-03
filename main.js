@@ -31,7 +31,7 @@ BTfoco.addEventListener('click', () => {
     alterarContexto(contexto);
     alterarTexto(contexto);
     alteraBotoes(BTfoco);
-    tempoEmSegundos = 15;
+    tempoEmSegundos = 1500;
 })
 
 BTcurto.addEventListener('click', () => {
