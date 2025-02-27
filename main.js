@@ -2,6 +2,8 @@ const fundo = document.querySelector('html');
 const BTfoco = document.querySelector('.app__card-button--foco');
 const BTcurto = document.querySelector('.app__card-button--curto');
 const BTlongo = document.querySelector('.app__card-button--longo');
+const tempoTemporizador = document.querySelector('#timer');
+
 let BTatual = BTfoco;
 
 const imagem = document.querySelector('.app__image');
@@ -14,9 +16,11 @@ musica.loop = true;
 const BTtempo = document.querySelector('#start-pause span');
 const imagemBotaoTempo = document.querySelector('.app__card-primary-butto-icon') 
 let tempoEmSegundos = 1500;
+let tempoTotal = tempoEmSegundos;
+mostraTempo(tempoTotal);
+
 let intervaloid = null;
 
-const tempoTemporizador = document.querySelector('#timer');
 
 botaoSom.addEventListener('click', () =>{
     if(musica.paused){
@@ -31,7 +35,10 @@ BTfoco.addEventListener('click', () => {
     alterarContexto(contexto);
     alterarTexto(contexto);
     alteraBotoes(BTfoco);
+
     tempoEmSegundos = 1500;
+    tempoTotal = tempoEmSegundos;
+    zerarTemporizador();
 })
 
 BTcurto.addEventListener('click', () => {
@@ -39,7 +46,10 @@ BTcurto.addEventListener('click', () => {
     alterarContexto(contexto);
     alterarTexto(contexto);
     alteraBotoes(BTcurto);
+
     tempoEmSegundos = 300;
+    tempoTotal = tempoEmSegundos;
+    zerarTemporizador();
 })
 
 BTlongo.addEventListener('click', () => {
@@ -47,8 +57,12 @@ BTlongo.addEventListener('click', () => {
     alterarContexto(contexto);
     alterarTexto(contexto);
     alteraBotoes(BTlongo);
+
     tempoEmSegundos = 900;
+    tempoTotal = tempoEmSegundos;
+    zerarTemporizador();
 })
+
 
 function alterarContexto(contexto){
     fundo.setAttribute('data-contexto', contexto) ;
@@ -97,12 +111,13 @@ function zerarTemporizador(){
     intervaloid  = null;
     BTtempo.textContent = 'Começar';
     imagemBotaoTempo.setAttribute('src', './imagens/play_arrow.png');
+    mostraTempo(tempoTotal);
 }
 
 const contagemRegresiva = () => {     
     if(tempoEmSegundos <= 0){
         zerarTemporizador();
-        //somFimTemporizador.play();
+        somFimTemporizador.play();
         alert('tempo finalizado');
         const fundoAtivo = fundo.getAttribute('data-contexto') == "foco";
         if(fundoAtivo){
@@ -113,14 +128,13 @@ const contagemRegresiva = () => {
         return;
     }
     tempoEmSegundos -= 1;
-
-    mostraTempo();
+    mostraTempo(tempoEmSegundos);
 }
 
 BTtempo.addEventListener('click',temporizador);
 
-function mostraTempo(){
-    const tempo = new Date (tempoEmSegundos*1000);
+function mostraTempo(time){
+    const tempo = new Date (time*1000);
     const tempoFormatado = tempo.toLocaleTimeString('pt-BR', {minute:'2-digit', second:'2-digit'}); 
-    tempoTemporizador.innerHTML = `${tempoFormatado}`;
+   tempoTemporizador.innerHTML = `${tempoFormatado}`;
 }
