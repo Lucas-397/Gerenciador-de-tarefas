@@ -7,9 +7,11 @@ const ulTarefas = document.querySelector('.app__section-task-list');
 const tarefasEmAndamento = document.querySelector('.app__section-active-task-description');
 const BTremoverTodos = document.querySelector('#btn-remover-todas')
 const BTremoverConcluidas = document.querySelector('#btn-remover-concluidas');
+const formTitle = document.getElementById('form-title'); 
 
 let tarefaSelecionada = null;
 let liTarefaSelecionada = null;  
+let editandoTarefa = null; // Nova variável para indicar que estamos editando
 
 let tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
 
@@ -33,23 +35,24 @@ function criarELementoTarefa (tarefa){
     paragrafo.textContent = tarefa.valor
     paragrafo.classList.add('app__section-task-list-item-description');
 
-    const botao = document.createElement('button');
-    botao.classList.add('app_button-edit');
-    botao.onclick = () =>{
-        const newDescription = prompt("Insira a nova tarefa");
-        paragrafo.textContent = newDescription;
-        tarefa.valor = newDescription;
-        atualizaTarefa();
-    }
+    const botaoEditar = document.createElement('button');
+    botaoEditar.classList.add('app_button-edit');
+
+    botaoEditar.onclick = () =>{
+        // Abre o card de edição e preenche com o valor original
+        Areatxt.value = tarefa.valor;
+        formTitle.textContent = 'Editar Tarefa';
+        AddTarefa.classList.remove('hidden');
+        editandoTarefa = tarefa; 
+    };
 
     const imagemBotao = document.createElement('img');
     imagemBotao.setAttribute('src', './imagens/edit.png');
 
-
-    botao.append(imagemBotao);
+    botaoEditar.append(imagemBotao);
     li.append(svg);
     li.append(paragrafo);
-    li.append(botao);
+    li.append(botaoEditar);
 
     if(tarefa.completa){
         li.classList.remove('app__section-task-list-item-active');
@@ -73,25 +76,42 @@ function criarELementoTarefa (tarefa){
             tarefasEmAndamento.textContent = tarefa.valor;
             li.classList.add('app__section-task-list-item-active');
         }
-    }
+    };
 
     return li;
 }
 
+// Evento de clique para abrir o formulário de adicionar nova tarefa
 BTadcionartarefa.addEventListener('click', () => {
+    Areatxt.value = ''; 
+    editandoTarefa = null; 
+    formTitle.textContent = 'Adicionar Tarefa';
     AddTarefa.classList.toggle('hidden');
 })
 
-
+// Evento de submissão do formulário
 AddTarefa.addEventListener('submit', (evento) =>{
     evento.preventDefault();
-    const tarefa = {
-        valor: Areatxt.value    
+    
+    if (editandoTarefa) {
+        // Se estivermos editando, apenas atualizar a tarefa existenteg
+        editandoTarefa.valor = Areatxt.value;
+        editandoTarefa = null;
+    } else {
+        // Caso contrário, adicionar uma nova tarefa
+        const tarefa = {
+            valor: Areatxt.value,
+            completa: false
+        };
+        tarefas.push(tarefa);
     }
-    tarefas.push(tarefa);
-    const elementoTarefa = criarELementoTarefa(tarefa);
-    ulTarefas.append(elementoTarefa);
+
+    ulTarefas.innerHTML = '';
+    tarefas.forEach(tarefa => {
+        ulTarefas.append(criarELementoTarefa(tarefa));
+    });
     atualizaTarefa();
+
     Areatxt.value = '';
     AddTarefa.classList.add('hidden');  
 })
@@ -99,6 +119,7 @@ AddTarefa.addEventListener('submit', (evento) =>{
 BTcancelar.onclick = () => {
     Areatxt.value = '';
     AddTarefa.classList.add('hidden');
+    editandoTarefa = null; 
 }
 
 BTdeletar.onclick  = () => {
@@ -106,9 +127,8 @@ BTdeletar.onclick  = () => {
     AddTarefa.classList.add('hidden');
 }
 
-
-tarefas.forEach(tarefa => {
-    const elementoTarefa = criarELementoTarefa(tarefa);
+tarefas.forEach(tarefaComponent => {
+    const elementoTarefa = criarELementoTarefa(tarefaComponent);
     ulTarefas.append(elementoTarefa);
 });
 
@@ -119,21 +139,18 @@ document.addEventListener('FocoFinalizado', () =>{
         liTarefaSelecionada.querySelector('button').setAttribute('disabled', true);
         tarefasEmAndamento.textContent = '';
         tarefaSelecionada.completa = true;
-        tarefasConcluidas.push(liTarefaSelecionada);
         atualizaTarefa();
     }
 })
 
 BTremoverTodos.onclick = () =>{
-    console.log('hello')    
+    tarefas = [];
+    ulTarefas.innerHTML = ''; // Remove todas as tarefas da tela
     localStorage.clear();
 }
 
 BTremoverConcluidas.onclick = () => {
-    const tarefasConcluidas = document.querySelectorAll('.app__section-task-list-item-complete');
-    tarefasConcluidas.forEach(element => {
-        element.remove();   
-    })
+    document.querySelectorAll('.app__section-task-list-item-complete').forEach(element => element.remove());
     tarefas = tarefas.filter(tarefa => !tarefa.completa);
     atualizaTarefa();
 }
